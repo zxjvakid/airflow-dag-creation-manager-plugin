@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import unicode_literals
+
 
 if __package__:
     from sys import version_info
@@ -131,7 +131,7 @@ if __package__:
     
     
     def login(self, request):
-        if current_user.is_authenticated():
+        if current_user.is_authenticated:
             flash("You are already logged in")
             return redirect(url_for('admin.index'))
     

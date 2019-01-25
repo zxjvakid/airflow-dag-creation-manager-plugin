@@ -76,14 +76,14 @@ def pygment_html_render(s, lexer=lexers.TextLexer):
 
 def render(obj, lexer):
     out = ""
-    if isinstance(obj, basestring):
+    if isinstance(obj, str):
         out += pygment_html_render(obj, lexer)
     elif isinstance(obj, (tuple, list)):
         for i, s in enumerate(obj):
             out += "<div>List item #{}</div>".format(i)
             out += "<div>" + pygment_html_render(s, lexer) + "</div>"
     elif isinstance(obj, dict):
-        for k, v in obj.items():
+        for k, v in list(obj.items()):
             out += '<div>Dict item "{}"</div>'.format(k)
             out += "<div>" + pygment_html_render(v, lexer) + "</div>"
     return out
@@ -124,7 +124,7 @@ class RequestArgsFilter(object):
     def refresh_filter_arg_dict(self):
         filter_arg_dict = OrderedDict(self.arg_tuple)
         index = 0
-        for filter_arg, filter_params in filter_arg_dict.iteritems():
+        for filter_arg, filter_params in list(filter_arg_dict.items()):
             for filter_operation in filter_params["operations"]:
                 filter_params["index"] = index
                 index += 1
@@ -132,7 +132,7 @@ class RequestArgsFilter(object):
 
     def refresh_filter_groups(self):
         filter_groups = OrderedDict()
-        for filter_arg, filter_params in self.filter_arg_dict.iteritems():
+        for filter_arg, filter_params in list(self.filter_arg_dict.items()):
             for filter_operation in filter_params["operations"]:
                 filter_groups[filter_arg] = [{
                     "index" : filter_params["index"],
@@ -222,7 +222,7 @@ class DagCreationManager(BaseView):
                     if task_name_value in task["task_name"]:
                         return True
                 return False
-            dcmp_dags = filter(filter_dcmp_dags_by_task_name, dcmp_dags)
+            dcmp_dags = list(filter(filter_dcmp_dags_by_task_name, dcmp_dags))
 
         if request_args_filter.filters_dict.get(COMMAND):
             command_value = request_args_filter.filters_dict.get(COMMAND)["value"]
@@ -231,7 +231,7 @@ class DagCreationManager(BaseView):
                     if command_value in task["command"]:
                         return True
                 return False
-            dcmp_dags = filter(filter_dcmp_dags_by_command, dcmp_dags)
+            dcmp_dags = list(filter(filter_dcmp_dags_by_command, dcmp_dags))
 
         search = request.args.get("search", "")
         if search:
@@ -483,7 +483,7 @@ class DagCreationManager(BaseView):
                 data = dag_converter.clean_dag_dict(data, strict=True)
             except Exception as e:
                 logging.exception("api.update_dag")
-                return jsonify({"code": -2, "detail": e.message, })
+                return jsonify({"code": -2, "detail": str(e), })
             new_dag_name = data["dag_name"]
             if new_dag_name != dag_name:
                 if dag_name and not can_access_approver():
@@ -590,7 +590,7 @@ class DagCreationManager(BaseView):
             res[template_field] = {"code": getattr(ti.task, template_field)}
         if result_format == "html":
             from airflow.www.views import attr_renderer # can not load views when airflow loads plugins.
-            for template_field, content in res.iteritems():
+            for template_field, content in res.items():
                 if template_field in attr_renderer:
                     content["html"] = attr_renderer[template_field](content["code"])
                 else:
